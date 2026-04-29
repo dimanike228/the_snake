@@ -2,101 +2,76 @@ from random import choice, randint
 
 import pygame
 
-# Константы для размеров поля и сетки:
+# Константы для размеров экрана и сетки
 SCREEN_WIDTH, SCREEN_HEIGHT = 640, 480
 GRID_SIZE = 20
 GRID_WIDTH = SCREEN_WIDTH // GRID_SIZE
 GRID_HEIGHT = SCREEN_HEIGHT // GRID_SIZE
 
-# Направления движения:
-UP = (0, -1)
-DOWN = (0, 1)
-LEFT = (-1, 0)
-RIGHT = (1, 0)
+# Направления движения
+UP = (0, -GRID_SIZE)
+DOWN = (0, GRID_SIZE)
+LEFT = (-GRID_SIZE, 0)
+RIGHT = (GRID_SIZE, 0)
 
-# Цвет фона - черный:
+# Цвета
 BOARD_BACKGROUND_COLOR = (0, 0, 0)
-
-# Цвет границы ячейки
 BORDER_COLOR = (93, 216, 228)
-
-# Цвет яблока
 APPLE_COLOR = (255, 0, 0)
-
-# Цвет змейки
 SNAKE_COLOR = (0, 255, 0)
 
-# Скорость движения змейки:
-SPEED = 20
+# Скорость игры
+SPEED = 10
 
-# Настройка игрового окна:
+# Инициализация Pygame
+pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
-
-# Заголовок окна игрового поля:
 pygame.display.set_caption('Змейка')
-
-# Настройка времени:
 clock = pygame.time.Clock()
 
 
-# Тут опишите все классы игры.
 class GameObject:
-    """
-    Базовый класс, от которого наследуются все объекты.
-    Содержит общие атрибуты: позиция и цвет.
-    """
+    """Базовый класс для всех игровых объектов."""
+
     def __init__(self, position=None, body_color=None):
-        """
-        Конструктор базового игрового объекта.
-        Аргументы: position (координаты), body_color (цвет)
-        """
+        """Инициализация базового игрового объекта."""
         if position is None:
-            self.position = (320, 240)
+            self.position = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
         else:
             self.position = position
+        self.body_color = body_color
 
     def draw(self, surface):
-        """
-        Абстрактный метод для прорисовки объекта на экране.
-        Аргумент: surface (поверхность,на которой рисуем)
-        """
+        """Абстрактный метод для отрисовки объекта."""
         pass
 
+
 class Apple(GameObject):
-    """
-    Класс Apple. Наследуется от GameObject.
-    Появляется в случайном месте поля.
-    """
-    apple_color = (255, 0, 0)
+    """Класс, описывающий яблоко."""
 
-    super().__init__(position=None, body_color=apple_color)
-
-    self.randomize_position()
+    def __init__(self):
+        """Инициализация яблока со случайной позицией."""
+        super().__init__(body_color=APPLE_COLOR)
+        self.randomize_position()
 
     def randomize_position(self):
-        """
-        Устанавливает случайные координаты для яблока.
-        """
-        max_x = 640 - 20
-        max_y = 480 - 20
+        """Устанавливает случайное положение яблока на игровом поле."""
+        self.position = (
+            randint(0, GRID_WIDTH - 1) * GRID_SIZE,
+            randint(0, GRID_HEIGHT - 1) * GRID_SIZE
+        )
 
-        x.random.randrage(0, max_x + 1, 20)
-        y.random.randrage(0, max_y + 1, 20)
-
-        self.position = (x, y)
-    
     def draw(self, surface):
-        """ 
-        Отрисовывает яблоко на игровом поле.
-        """
+        """Отрисовывает яблоко на игровой поверхности."""
         rect = pygame.Rect(
             self.position[0],
             self.position[1],
-            20,
-            20
+            GRID_SIZE,
+            GRID_SIZE
         )
+        pygame.draw.rect(surface, self.body_color, rect)
+        pygame.draw.rect(surface, BORDER_COLOR, rect, 1)
 
-        pygame.draw.rect(surface, self.body_color,rect)
 
 class Snake(GameObject):
     """Класс, описывающий змейку."""
@@ -137,8 +112,7 @@ class Snake(GameObject):
             else:
                 self.last = None
 
-
-def draw(self, surface):
+    def draw(self, surface):
         """Отрисовывает змейку на экране."""
         # Отрисовка тела змейки (кроме головы)
         for position in self.positions[:-1]:
